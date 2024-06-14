@@ -1,7 +1,7 @@
 cc := gcc
 flags :=  -g
 libs := -lz
-obj := emerald.o alloc.o
+obj := main.o emerald.o utills.o
 
 emerald: $(obj)
 	$(cc) $(obj) $(libs) $(flags) -o $@

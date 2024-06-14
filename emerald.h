@@ -24,61 +24,10 @@ extern EmrldStruct *EmrldCntxt;
 *                                                                              *
 * Return                                                                       *
 *                                                                              *
-*  -EmrlddStruct*: A newly allocated emrldd context.                         *
+*  -EmrldStruct*: A newly allocated emrldd context.                         *
 *                                                                              *
 \******************************************************************************/
 EmrldStruct *EmrldCreateContext();
-
-/******************************************************************************\
-* EMeraldAllocTsk                                                              *
-*                                                                              *
-*  Allocates a new task and returns its id.                                    *
-*                                                                              *
-* Parameters                                                                   *
-*                                                                              *
-*  -Emrld: The emerald context.                                                *
-*                                                                              *
-* Return                                                                       *
-*                                                                              *
-*  -int: The Id of the new task.                                               *
-*                                                                              *
-\******************************************************************************/
-int EmrldAllocTsk(EmrldStruct *Emrld);
-
-
-/******************************************************************************\
-* EmrldFreeTask                                                                *
-*                                                                              *
-*  Frees the task at Id.                                                       *
-*                                                                              *
-* Parameters                                                                   *
-*                                                                              *
-*  -Emrld: The emrldd context.                                                 *
-*  -Id: The id of the task to free.                                            *
-*                                                                              *
-* Return                                                                       *
-*                                                                              *
-*  -void.                                                                      *
-*                                                                              *
-\******************************************************************************/
-void EmrldFreeTask(EmrldStruct *Emrld, int Id);
-
-/******************************************************************************\
-* EmrlddGetTask                                                                *
-*                                                                              *
-*  Retrieves the task placed at Id.                                            *
-*                                                                              *
-* Parameters                                                                   *
-*                                                                              *
-*  -Emrld: The emrldd context.                                                 *
-*  -Id: The Id of the requested task.                                          *
-*                                                                              *
-* Return                                                                       *
-*                                                                              *
-*  -TskStruct*: The task struct.                                               *
-*                                                                              *
-\******************************************************************************/
-TskStruct *EmrlddGetTask(EmrldStruct *Emrld, int Id);
 
 /******************************************************************************\
 * EmrldGetPhysicalSize                                                         *
@@ -91,5 +40,15 @@ TskStruct *EmrlddGetTask(EmrldStruct *Emrld, int Id);
 *                                                                              *
 \******************************************************************************/
 size_t EmrldGetPhysicalSize();
+
+void EmrldAddTsk(char *String,
+                 int Priority,
+                 BoolType IsScheduled,
+                 DateType Date);
+void EmrldPrintOverdueTasks();
+void EmrldPrintAll();
+void EmrldPrintTasksByDate(DateType Date);
+void EmrldRemoveTsk(int Id);
+void EmrldPerformCleanup();
 
 #endif /* EMERALD_H */

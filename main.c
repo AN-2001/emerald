@@ -31,7 +31,7 @@
     "- help: prints this message.\n" \
     "- init: initializes the emerald todo list file.\n" \
     "- add [date]: add a new task to the todo list, date is optional, if it's not set then the task is not scheduled.\n" \
-    "- edit: edit an existing task in the todo list, given an id.\n" \
+    "- edit id: edit an existing task in the todo list, given an id.\n" \
     "- remove id: removes a given task.\n" \
     "- print [date]: print tasks in the todo list, date is optional, if it's not set the overdue tasks are printed.\n" \
     
@@ -45,6 +45,8 @@ static void VerifyEmeraldDir();
 static int ParseArgs(int argc, const char *Argv[]);
 static void WriteBackContext();
 static void ObtainString(char *String);
+static void OpenEditor(char *Path, char *String);
+static void PerformEdit(int32_t Id);
 
 int main(int argc, const char *Argv[])
 {
@@ -101,6 +103,7 @@ static int ParseArgs(int argc, const char *Argv[])
         return 1;
     }
 
+    EmrldPerformCleanup();
     if (argc > 1 && strcmp(Argv[1], "add") == 0) {
         ObtainString(String);
         if (argc > 2) {
@@ -113,6 +116,11 @@ static int ParseArgs(int argc, const char *Argv[])
 
     if (argc > 1 && strcmp(Argv[1], "edit") == 0) {
         /* IMPLEMENT EDIT */
+        if (argc == 2) {
+            fprintf(stderr, "Emerald: didn't specify the task id to edit.\n");
+            return 1;
+        } else
+            PerformEdit(atoi(Argv[2]));
     }
 
     if (argc > 1 && strcmp(Argv[1], "print") == 0) {
@@ -164,22 +172,10 @@ static void WriteBackContext()
     }
 }
 
-static void ObtainString(char *String)
+static void OpenEditor(char *Path, char *String)
 {
-    char
-        Path[] = "EMRLDXXXXXX";
     char *Args[] = {"nvim", Path, NULL};
-    int Child, i,
-        fd = mkstemp(Path);
-    char c;
-
-    if (fd < 0) {
-        perror("mkstemp");
-        exit(1);
-    }
-
-    /* Weird bug, we have to reopen the fd later.                             */
-    close(fd);
+    int Child, fd, Size;
 
     Child = fork();
     if (Child < 0) {
@@ -194,13 +190,39 @@ static void ObtainString(char *String)
 
     wait(NULL);
     fd = open(Path, O_RDONLY);
-    i = 0;
-    while (i < EMERALD_LONG_STR_SIZE) {
-        if (!read(fd, &c, 1))
-            break;
-        String[i++] = c;
-    }
-    String[i] = '\0';
+    memset(String, 0, EMERALD_LONG_STR_SIZE);
+    read(fd, String, EMERALD_LONG_STR_SIZE);
     close(fd);
     unlink(Path);
+}
+
+static void ObtainString(char *String)
+{
+    char
+        Path[] = "EMRLDXXXXXX";
+    int 
+        fd = mkstemp(Path);
+
+    if (fd < 0) {
+        perror("mkstemp");
+        exit(1);
+    }
+
+    /* Weird bug, we have to reopen the fd later.                             */
+    close(fd);
+    OpenEditor(Path, String);
+}
+
+static void PerformEdit(int32_t Id)
+{
+    char
+        Path[] = "EMRLDXXXXXX";
+    int 
+        fd = mkstemp(Path);
+    TskStruct
+        *Tsk = &EmrldCntxt -> TskPool[Id];
+
+    write(fd, Tsk -> String, strlen(Tsk -> String));
+    close(fd);
+    OpenEditor(Path, Tsk -> String);
 }

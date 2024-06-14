@@ -63,7 +63,7 @@ void EmrldPrintOverdueTasks()
         return;
     printf("Emerald: Printing overdue tasks\n");
     PrintList(EmrldCntxt -> FirstOverdueTask);
-    printf("\n\n\n");
+    printf("\n");
 }
 
 void EmrldPrintTasksByDate(DateType Date)
@@ -76,7 +76,7 @@ void EmrldPrintTasksByDate(DateType Date)
 
     printf("Emerald: Printing tasks for %s\n", Date);
     PrintList(EmrldCntxt -> Schedule[AsIndex]);
-    printf("\n\n\n");
+    printf("\n");
 }
 
 static inline void PrintTsk(TskStruct *Tsk)

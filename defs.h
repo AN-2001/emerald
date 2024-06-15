@@ -14,7 +14,7 @@
 #include <stdint.h>
 
 typedef uint8_t BoolType;
-typedef char DateType[5];
+typedef char DateType[9]; /* dd/mm/yy */
 
 /* A max of 4096 active tasks. */
 #define EMERALD_LONG_STR_SIZE (4096)

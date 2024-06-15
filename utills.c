@@ -1,6 +1,6 @@
 #include "utills.h"
 
-int EmeraldDateToIndex(char *Date)
+int EmrldDateToIndex(char *Date)
 {
     int Day, Month;
 

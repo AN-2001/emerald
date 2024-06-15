@@ -11,6 +11,6 @@
 #define UTILLS_H
 
 /* Date is always formatted as dd/mm                                          */
-int EmeraldDateToIndex(char *Date);
+int EmrldDateToIndex(char *Date);
 
 #endif /* UTILLS_H */

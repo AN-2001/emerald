@@ -32,7 +32,7 @@ void EmrldAddTsk(char *String,
     Tsk -> Priority = Priority;
 
     if (IsScheduled) {
-        DateIndex = EmeraldDateToIndex(Date);
+        DateIndex = EmrldDateToIndex(Date);
         memcpy(Tsk -> OriginalDate, Date, sizeof(Tsk -> OriginalDate));
         OldTsk = &EmrldCntxt -> Schedule[DateIndex];
     } else
@@ -69,7 +69,7 @@ void EmrldPrintOverdueTasks()
 void EmrldPrintTasksByDate(DateType Date)
 {
     int32_t
-        AsIndex = EmeraldDateToIndex(Date);
+        AsIndex = EmrldDateToIndex(Date);
 
     if (EmrldCntxt -> Schedule[AsIndex] == EMERALD_TASK_FREE)
         return;
@@ -115,7 +115,7 @@ static inline void RemoveTskFromList(int32_t Id)
             EmrldCntxt -> FirstOverdueTask = Tsk -> NextTsk;
         else
             EmrldCntxt -> 
-                Schedule[EmeraldDateToIndex(Tsk ->
+                Schedule[EmrldDateToIndex(Tsk ->
                                     OriginalDate)] = Tsk -> NextTsk;
     } else
         GetTsk(Tsk -> PrevTsk) -> NextTsk = Tsk -> NextTsk;
@@ -150,18 +150,26 @@ EmrldStruct *EmrldCreateContext()
 void EmrldPerformCleanup()
 {
     TskStruct *Tsk;
-    int32_t i, TodayIndex, Index;
+    int32_t i, TodayIndex, Index, TodayYear, Year;
     time_t 
         Time = time(NULL);
     struct tm tm = *localtime(&Time);
     char Today[512];
 
     sprintf(Today, "%02d/%02d", tm.tm_mday, tm.tm_mon + 1);
-    TodayIndex = EmeraldDateToIndex(Today);
+    TodayYear = tm.tm_year - 100;
+    TodayIndex = EmrldDateToIndex(Today);
+
     for (i = 0; i < EmrldCntxt -> NumTasks; i++) {
         Tsk = GetTsk(i);
-        if (Tsk -> Id == -1 || Tsk -> Type == TASK_OVERDUE ||
-                EmeraldDateToIndex(Tsk -> OriginalDate) >= TodayIndex)
+        if (Tsk -> Id == -1 || Tsk -> Type == TASK_OVERDUE)
+            continue;
+
+        Year = (Tsk -> OriginalDate[6] - '0') * 10 +
+               (Tsk -> OriginalDate[7] - '0');
+
+        if(Year >= TodayYear &&
+                EmrldDateToIndex(Tsk -> OriginalDate) >= TodayIndex)
             continue;
 
         RemoveTskFromList(Tsk -> Id);

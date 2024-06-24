@@ -103,6 +103,7 @@ static int ParseArgs(int argc, const char *Argv[])
         return 1;
     }
 
+    /* Cleanup before we do anything. */
     EmrldPerformCleanup();
     if (argc > 1 && strcmp(Argv[1], "add") == 0) {
         ObtainString(String);
@@ -142,9 +143,6 @@ static int ParseArgs(int argc, const char *Argv[])
             EmrldRemoveTsk(atoi(Argv[2]));
     }
 
-    /* Calculate overdue tasks etc... */
-    EmrldPerformCleanup();
-
     /* Write back the context back to disk. */
     WriteBackContext();
     return 0;
@@ -152,14 +150,16 @@ static int ParseArgs(int argc, const char *Argv[])
 
 static void VerifyEmeraldDir()
 {
-    char Directory[EMERALD_LONG_STR_SIZE];
+    char Directory[EMERALD_STR_SIZE];
     struct stat StatBuffer;
 
-    sprintf(Directory, "%s/%s", getpwuid(getuid()) -> pw_dir, SaveDir);
+    snprintf(Directory, EMERALD_STR_SIZE, "%s/%s",
+             getpwuid(getuid()) -> pw_dir, SaveDir);
     /* Create the directory if it doesn't exist.                              */
     if (stat(Directory, &StatBuffer) && !S_ISDIR(StatBuffer.st_mode))
         mkdir(Directory, 0777);
-    sprintf(CntxtPath, "%s/%s", Directory, EMERALD_FILE_NAME);
+    snprintf(CntxtPath, EMERALD_LONG_STR_SIZE,
+             "%s/" EMERALD_FILE_NAME, Directory);
 }
 
 static void WriteBackContext()

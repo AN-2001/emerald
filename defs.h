@@ -17,6 +17,7 @@ typedef uint8_t BoolType;
 typedef char DateType[9]; /* dd/mm/yy */
 
 /* A max of 4096 active tasks. */
+#define EMERALD_STR_SIZE (1024)
 #define EMERALD_LONG_STR_SIZE (4096)
 #define EMERALD_TASK_STARTER_SIZE (64)
 #define EMERALD_DAY_COUNT (372) /* 12 * 31, an upper bound on the number of days. */

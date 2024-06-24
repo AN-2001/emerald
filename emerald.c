@@ -100,7 +100,6 @@ static inline void PrintList(int32_t Start)
 
 }
 
-
 static inline void RemoveTskFromList(int32_t Id)
 {
     TskStruct
@@ -119,6 +118,9 @@ static inline void RemoveTskFromList(int32_t Id)
                                     OriginalDate)] = Tsk -> NextTsk;
     } else
         GetTsk(Tsk -> PrevTsk) -> NextTsk = Tsk -> NextTsk;
+
+    if (Tsk -> NextTsk != EMERALD_TASK_FREE)
+        GetTsk(Tsk -> NextTsk) -> PrevTsk = Tsk -> PrevTsk;
 
     Tsk -> PrevTsk = Tsk -> NextTsk = EMERALD_TASK_FREE;
 }
@@ -154,10 +156,10 @@ void EmrldPerformCleanup()
     time_t 
         Time = time(NULL);
     struct tm tm = *localtime(&Time);
-    char Today[512];
+    char Today[EMERALD_LONG_STR_SIZE];
 
     sprintf(Today, "%02d/%02d", tm.tm_mday, tm.tm_mon + 1);
-    TodayYear = tm.tm_year - 100;
+    TodayYear = tm.tm_year - 100; /* Year as two digits, 2000 is omitted.     */
     TodayIndex = EmrldDateToIndex(Today);
 
     for (i = 0; i < EmrldCntxt -> NumTasks; i++) {
@@ -168,7 +170,7 @@ void EmrldPerformCleanup()
         Year = (Tsk -> OriginalDate[6] - '0') * 10 +
                (Tsk -> OriginalDate[7] - '0');
 
-        if(Year >= TodayYear &&
+        if(Year > TodayYear ||
                 EmrldDateToIndex(Tsk -> OriginalDate) >= TodayIndex)
             continue;
 
@@ -202,14 +204,16 @@ static inline int32_t AllocTsk()
                 sizeof(*EmrldCntxt) + sizeof(TskStruct) * Tmp -> NumTasks);
         EmrldCntxt = Tmp;
         EmrldCntxt -> Extended = EMERALD_TRUE;
-        printf("WOOOOO WTF?\n");
         ZeroOutTasks(EmrldCntxt, i);
+        /* Crash on purpose, so that we can catch it. */
+        asm("int3");
     }
 
     Tsk = &EmrldCntxt -> TskPool[i];
     Tsk -> Id = i;
     Tsk -> IsDone = Tsk -> IsOverdue = EMERALD_FALSE;
     Tsk -> Priority = 0;
+    Tsk -> PrevTsk = Tsk -> NextTsk = EMERALD_TASK_FREE;
     memset(Tsk -> String, 0, sizeof(Tsk -> String));
     memset(Tsk -> OriginalDate, 0, sizeof(Tsk -> OriginalDate));
     return i;
